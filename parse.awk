@@ -43,7 +43,10 @@ function trim(v) {
 		} else {
                 print "Could not guess name:" NAME; exit 1
         }
-		if(IMGNAME != "") {
+		if (IMGNAME != "") {
+		if ( system("[ -f img/"IMGNAME" ] ")  == 0 ) { 
+			print "File exsist, will not download" > "/dev/stderr"
+		} else {
 			WIKIIMGURL = "http://minecraft.gamepedia.com/File:"IMGNAME
 
 			cmd = "wget -O - \""WIKIIMGURL"\""
@@ -60,7 +63,8 @@ function trim(v) {
 			}
 			#print "the result: " result
 		}
+		}
 		print ID","SYSNAME","NAME","IMGNAME
 		# Quickstop if we just wat to test
-		if(ID == "2") { exit 1 }
+		#if(ID == "2") { exit 1 }
 		}
