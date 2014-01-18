@@ -1,0 +1,9 @@
+#! /bin/bash
+TMP1=$(mktemp)
+TMP2=$(mktemp)
+echo "Made ${TMP1} and ${TMP2}"
+cat wiki.raw > "${TMP1}"
+# wget -O - 'http://minecraft.gamepedia.com/index.php?title=Data_values/Block_IDs&action=raw' > "${TMP1}"
+cat "${TMP1}"
+rm ${TMP1} ${TMP2}
+echo "Removed ${TMP1} and ${TMP2}"
