@@ -43,6 +43,24 @@ function trim(v) {
 		} else {
                 print "Could not guess name:" NAME; exit 1
         }
-		print ID","SYSNAME","NAME","IMGNAME
+		if(IMGNAME != "") {
+			WIKIIMGURL = "http://minecraft.gamepedia.com/File:"IMGNAME
+
+			cmd = "wget -O - \""WIKIIMGURL"\""
+			result = ""
+			while ( (cmd | getline line) > 0 ){
+				result = result " " line
+			}
+			close(cmd)
+			if (match(result, /<div class="fullImageLink" id="file"><a href="(http:\/\/hydra-media.cursecdn.com\/minecraft.gamepedia.com\/)([^"]*)/, matches)) {
+				IMGURL=matches[1]""matches[2] ;
+				#print IMGURL
+				# -N so we dont update if server image has same size and not newer
+				system("cd img &&  wget -N \""IMGURL"\"")
+			}
+			#print "the result: " result
 		}
-END {}
+		print ID","SYSNAME","NAME","IMGNAME
+		# Quickstop if we just wat to test
+		if(ID == "2") { exit 1 }
+		}
