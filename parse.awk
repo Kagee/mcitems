@@ -8,6 +8,13 @@ function trim(v) {
     return v 
  } 
 
+# https://github.com/acmeism/RosettaCodeData/blob/master/Task/URL-decoding/AWK/url-decoding.awk
+function hex2dec(s,  num) {
+	    num = index("0123456789ABCDEF",toupper(substr(s,length(s)))) - 1
+		    sub(/.$/,"",s)
+			    return num + (length(s) ? 16*hex2dec(s) : 0)
+}
+
 /^\| / {
 		IMGNAME = trim($1);
 		#| height="27px" | [[File:Sunflower.png|15px]]
@@ -44,7 +51,8 @@ function trim(v) {
                 print "Could not guess name:" NAME; exit 1
         }
 		if (IMGNAME != "") {
-		if ( system("[ -f img/"IMGNAME" ] ")  == 0 ) { 
+		gsub(" ","_", IMGNAME)
+		if ( system("[ -f \"img/"IMGNAME"\" ] ")  == 0 ) { 
 			print "File exsist, will not download" > "/dev/stderr"
 		} else {
 			WIKIIMGURL = "http://minecraft.gamepedia.com/File:"IMGNAME
@@ -57,14 +65,29 @@ function trim(v) {
 			close(cmd)
 			if (match(result, /<div class="fullImageLink" id="file"><a href="(http:\/\/hydra-media.cursecdn.com\/minecraft.gamepedia.com\/)([^"]*)/, matches)) {
 				IMGURL=matches[1]""matches[2] ;
-				#print IMGURL
+				result = matches[2];
+				if (match(result, /([^/]+)$/, matches)) {
+					if (matches[1] != IMGNAME) {
+						NEWNAME = matches[1]
+						# https://github.com/acmeism/RosettaCodeData/blob/master/Task/URL-decoding/AWK/url-decoding.awk
+						while (match(NEWNAME,/%/)) {
+					      L = substr(NEWNAME,1,RSTART-1) # chars to left of "%"
+					      M = substr(NEWNAME,RSTART+1,2) # 2 chars to right of "%"
+					      R = substr(NEWNAME,RSTART+3)   # chars to right of "%xx"
+					      NEWNAME = sprintf("%s%c%s",L,hex2dec(M),R)
+					    }
+						#print "NEW NAME: "NEWNAME " was " IMGNAME
+						IMGNAME = NEWNAME
+					}
+				}
 				# -N so we dont update if server image has same size and not newer
 				system("cd img &&  wget -N \""IMGURL"\"")
 			}
 			#print "the result: " result
 		}
 		}
-		print ID","SYSNAME","NAME","IMGNAME
+		printf "%-4s %-45s %-30s %s\n", ID, SYSNAME, NAME, IMGNAME
+		#print ID"\t"SYSNAME"\t"NAME"\t"IMGNAME
 		# Quickstop if we just wat to test
 		#if(ID == "2") { exit 1 }
 		}
